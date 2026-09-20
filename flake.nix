@@ -32,7 +32,7 @@
             cp -r ${pkgs.lib.fileset.toSource {
               root = ./.;
               fileset = pkgs.lib.fileset.unions [
-                ./.github ./scripts/integration.sh ./scripts/release.sh
+                ./.github ./scripts/integration.sh ./scripts/release.sh ./scripts/update-dependencies.sh
                 ./scripts/verify-release.py ./tests/release
               ];
             }} source
@@ -85,7 +85,7 @@
               go pkg-config gobject-introspection wrapGAppsHook4
               dbus xvfb-run xdotool openbox openssh (python3.withPackages (p: [ p.paramiko ])) weston
               golangci-lint actionlint shellcheck
-              jq zstd
+              jq zstd nix-update
             ];
             buildInputs = with pkgs; [ gtk4 openssl libfido2 ];
             shellHook = ''
