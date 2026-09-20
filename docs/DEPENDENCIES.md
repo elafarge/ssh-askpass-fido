@@ -12,10 +12,20 @@ Actions only; standalone Go bumps would leave the Nix vendor hash stale.
 
 Each changed run pushes a fresh branch and opens a PR without rewriting existing
 branches. No changes means no PR. The workflow explicitly dispatches CI on the
-branch: GitHub suppresses ordinary PR events created by `GITHUB_TOKEN`, but
-allows workflow dispatch. Review both Linux architecture jobs before merging;
-updates are not automatically merged. Repository Actions settings must allow
-GitHub Actions to create pull requests. No personal access token is required.
+branch: bot-created PR checks may be suppressed or require approval, but GitHub
+allows workflow dispatch. The updater enables native GitHub squash auto-merge
+only for the PR it creates. Failed checks leave the PR open for investigation.
+No personal access token is required.
+
+Repository settings must enable auto-merge and allow GitHub Actions to create
+pull requests. Protect `main` with required checks `checks / Linux (x86_64-linux)`
+and `checks / Linux (aarch64-linux)` from GitHub Actions, and require branches to
+be up to date before merging. These repository-side settings are essential:
+`gh pr merge --auto` alone is not a CI gate on an unprotected branch. Required
+checks apply to all PRs; automatic merging is enabled only for weekly updates.
+If `main` advances, update the PR branch and rerun CI before it can merge.
+Merges using `GITHUB_TOKEN` do not trigger ordinary push workflows; the required
+pre-merge CI provides validation for these updates.
 
 The updater uses the maintained MIT-licensed `nix-update`, pinned through
 `flake.lock`, rather than implementing Nix hash-mismatch parsing. Its releases,
