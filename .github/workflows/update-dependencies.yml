@@ -28,7 +28,7 @@ jobs:
       - uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24 # v31.11.1
       - name: Update Nix, Go modules, and vendor hash
         run: bash scripts/update-dependencies.sh
-      - name: Open pull request and start CI
+      - name: Open pull request, start CI, and enable auto-merge
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
@@ -43,11 +43,12 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add flake.lock go.mod go.sum nix/package.nix
           git commit -m 'Update Nix and Go dependencies together' \
-            -m 'Refresh the flake inputs and Go production/test dependencies in the updated Nix environment. Regenerate vendorHash with nix-update so the package remains reproducible. CI validates both Linux architectures and graphical integration before review.'
+            -m 'Refresh the flake inputs and Go production/test dependencies in the updated Nix environment. Regenerate vendorHash with nix-update so the package remains reproducible. Required CI validates both Linux architectures and graphical integration before automatic merging.'
           gh auth setup-git
           git push "https://github.com/${GH_REPO}.git" "HEAD:refs/heads/$branch"
-          gh pr create --base main --head "$branch" \
+          pr_url=$(gh pr create --base main --head "$branch" \
             --title 'Update Nix and Go dependencies' \
-            --body 'Weekly dependency refresh: Nix inputs (including native libraries and build tools), Go production/test dependencies, and the matching Nix vendor hash. Go updates stay within existing module major versions; major-version migrations require review. The updater explicitly dispatches CI on this branch because PRs created with GITHUB_TOKEN do not trigger pull_request workflows. Merge only after both architecture checks pass.' \
-            | tee -a "$GITHUB_STEP_SUMMARY"
+            --body 'Weekly dependency refresh: Nix inputs (including native libraries and build tools), Go production/test dependencies, and the matching Nix vendor hash. Go updates stay within existing module major versions; major-version migrations require review. The updater explicitly dispatches CI on this branch because bot-created PR checks may be suppressed or require approval. Native GitHub auto-merge waits for both required Linux architecture checks and an up-to-date branch. Failed checks leave the PR open.')
+          echo "$pr_url" >> "$GITHUB_STEP_SUMMARY"
           gh workflow run ci.yml --ref "$branch"
+          gh pr merge "$pr_url" --auto --squash --match-head-commit "$(git rev-parse HEAD)"
