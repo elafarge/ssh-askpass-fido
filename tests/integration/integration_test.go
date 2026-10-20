@@ -208,6 +208,19 @@ func window(t *testing.T, p *process, title string) string {
 	return ""
 }
 
+func traceEvent(t *testing.T, p *process, event string) {
+	t.Helper()
+	needle := "msg=" + event
+	deadline := time.Now().Add(10 * time.Second)
+	for time.Now().Before(deadline) {
+		if strings.Contains(p.err.String(), needle) {
+			return
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+	t.Fatalf("no trace event %q: %s", event, p.err.String())
+}
+
 func typeAnswer(t *testing.T, p *process, title, value string) {
 	t.Helper()
 	w := window(t, p, title)
@@ -298,6 +311,10 @@ func TestErrorsAndSignals(t *testing.T) {
 	must(t, p.cmd.Process.Signal(syscall.SIGTERM))
 	wait(t, p, 1, "")
 	p = start(t, map[string]string{"SSH_ASKPASS_PROMPT": "none"}, askpass, "notification")
+	// The input event is emitted after the adapter has installed its signal
+	// handler; signalling immediately after Start races with process
+	// initialization and can be reported as signal termination.
+	traceEvent(t, p, "input")
 	must(t, p.cmd.Process.Signal(syscall.SIGTERM))
 	select {
 	case err := <-p.done:
