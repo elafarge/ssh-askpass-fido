@@ -300,7 +300,10 @@ func TestErrorsAndSignals(t *testing.T) {
 	p = start(t, map[string]string{"SSH_ASKPASS_PROMPT": "none"}, askpass, "notification")
 	must(t, p.cmd.Process.Signal(syscall.SIGTERM))
 	select {
-	case <-p.done:
+	case err := <-p.done:
+		if err != nil {
+			t.Fatal(err)
+		}
 	case <-time.After(3 * time.Second):
 		t.Fatal("early termination blocked")
 	}
