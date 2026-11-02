@@ -9,7 +9,7 @@ buildGoModule {
       ../go.mod ../go.sum ../LICENSE ../.golangci.yml
     ];
   };
-  vendorHash = "sha256-btGdctyx+OIiEHnEuQxzsnNbizbsxJl1y8NgjKSKPvc=";
+  vendorHash = "sha256-DWvsgmKUAraoQkwNxHM6S4C71CrWgh439S/4SJyk5ZQ=";
   subPackages = [ "cmd/ssh-askpass-fido" "cmd/ssh-askpass-fido-service" "cmd/ssh-askpass-fido-ui" ];
   nativeBuildInputs = [ pkg-config gobject-introspection wrapGAppsHook4 golangci-lint ];
   buildInputs = [ gtk4 gobject-introspection adwaita-icon-theme libfido2 ];
