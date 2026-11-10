@@ -12,8 +12,8 @@ require (
 	github.com/knadh/koanf/providers/posflag v1.0.2
 	github.com/knadh/koanf/v2 v2.4.1
 	github.com/spf13/cobra v1.10.2
-	github.com/spf13/pflag v1.0.10
-	golang.org/x/sys v0.49.0
+	github.com/spf13/pflag v1.1.0
+	golang.org/x/sys v0.50.0
 )
 
 require (
@@ -24,5 +24,5 @@ require (
 	github.com/pelletier/go-toml/v2 v2.4.3 // indirect
 	github.com/stretchr/testify v1.11.1 // indirect
 	go.yaml.in/yaml/v3 v3.0.6 // indirect
-	golang.org/x/sync v0.24.0 // indirect
+	golang.org/x/sync v0.25.0 // indirect
 )
